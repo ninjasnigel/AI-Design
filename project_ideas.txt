@@ -1,0 +1,27 @@
+- Better movie recommendations system
+    genres, keywords, actors etc...
+
+- Västtrafik?
+    mer optimierade rutter 
+    ai hur? coolt? 
+    västrrafik har api mkt möjligheter
+
+- Reddit bot? 
+    Kanske kan låtsas vara en användare, 
+    tränas på datan från en sub som ett språk
+    spotta ut meningar?
+
+- Music recommendation system?! 
+    Clustering? sounds kul
+    Mood based?
+    Activity based?
+    Collaborative filtering? borde funka bättre än filmer?
+    Personalized music timeline!?
+        skapa en historia med hur ens musiksmak har utvecklats?
+    Lyrics analysis?
+    Generera en spellista med rekommendationer för användare
+
+- Sentiment analysis?
+    Recommend movie based on sentiment of reviews? How?
+    Movie success predictor based on critic review before release
+    News?
