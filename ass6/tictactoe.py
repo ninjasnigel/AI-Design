@@ -7,7 +7,8 @@ import tkinter as tk
 
 class TicTacToe:
     def __init__(self, size=3, win_condition=3, mtsc_iterations=1000):
-        self.board = np.zeros((size, size), dtype=int)
+        self.size = size
+        self.board = np.zeros((self.size, self.size), dtype=int)
         self.current_turn = 1  # 1 for 'X', -1 for 'O'
         self.win_condition = win_condition
 
@@ -19,14 +20,13 @@ class TicTacToe:
         return False
 
     def check_winner(self):
-        for i in range(self.win_condition):
-            if abs(self.board[i, :].sum()) == self.win_condition: return self.board[i, 0]
-            if abs(self.board[:, i].sum()) == self.win_condition: return self.board[0, i]
-        if abs(np.diag(self.board).sum()) == self.win_condition: return self.board[0, 0]
-        if abs(np.diag(np.fliplr(self.board)).sum()) == self.win_condition: return self.board[0, -1]
+        for i in range(self.size):
+            if abs(self.board[i, :].sum()) == self.win_condition: return 2
+            if abs(self.board[:, i].sum()) == self.win_condition: return 2
+        if abs(np.diag(self.board).sum()) == self.win_condition: return 2
+        if abs(np.diag(np.fliplr(self.board)).sum()) == self.win_condition: return 2
         if np.all(self.board != 0):
-            print("huh???")
-            return 0  # Draw
+            return 1  # Draw
         return None
 
     def get_available_moves(self):
@@ -120,11 +120,10 @@ class TicTacToeGUI:
     def on_click(self, row, col):
         if self.game.make_move(row, col):
             self.update_buttons()
-            winner = self.game.check_winner()
-            if winner is not None:
-                self.end_game(winner)
-            else:
-                self.ai_move()
+            won = self.game.check_winner()
+            if won == 1: self.end_game(0)
+            elif won == 2: self.end_game(1)            
+            else: self.ai_move()
 
     def update_buttons(self):
         for i in range(self.size):
@@ -138,9 +137,9 @@ class TicTacToeGUI:
         move = root.select_child().move
         self.game.make_move(*move)
         self.update_buttons()
-        winner = self.game.check_winner()
-        if winner is not None:
-            self.end_game(winner)
+        won = self.game.check_winner()
+        if won == 1: self.end_game(0)
+        elif won == 2: self.end_game(-1)
 
     def end_game(self, winner):
         print(winner)
@@ -156,7 +155,7 @@ class TicTacToeGUI:
 def main():
     root = tk.Tk()
     root.title("Tic-Tac-Toe AI")
-    app = TicTacToeGUI(root, size=5, win_condition=2, mtsc_iterations=1000)
+    app = TicTacToeGUI(root, size=3, win_condition=3, mtsc_iterations=1000)
     root.mainloop()
 
 main()
