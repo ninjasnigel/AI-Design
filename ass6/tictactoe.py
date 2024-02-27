@@ -2,6 +2,7 @@ import numpy as np
 import random
 import math
 import tkinter as tk
+#import sort?
 
 # Zip would make the code look much cleaner instead of bombing this .py
 
@@ -52,7 +53,11 @@ class MCTSNode:
         return self.wins / self.visits + math.sqrt(2) * math.sqrt(math.log(self.parent.visits) / self.visits) if self.parent else float('inf')
 
     def select_child(self):
-        return max(self.children, key=lambda c: c.UCT())
+        sorted_children = sorted(self.children, key=lambda c: c.UCT())
+        print([c.UCT() for c in sorted_children])
+        selected_child = max(sorted_children, key=lambda c: c.UCT())
+        print(f"Selected move: {selected_child.move} with UCT: {selected_child.UCT()}")
+        return selected_child
 
     def add_child(self, move):
         new_game = self.game.copy()
@@ -64,40 +69,42 @@ class MCTSNode:
 
     def update(self, result):
         self.visits += 1
-        
-        if self.game.current_turn == -1 and result == -1:
+        if result == -1:
             self.wins += 1
         elif result == 0:
             self.wins += 0.5
+        elif result == 1:
+            self.wins -= 500000
         
 
-def MCTS(root, iterations=5000):
+def MCTS(root, iterations=500):
     for _ in range(iterations):
         node = root
         game = root.game.copy()
 
-        while node.untried_moves == [] and node.children != []:
-            node = node.select_child()
-            game.make_move(*node.move)
+        # if game is over, backpropagate
+        if game.check_winner() is None:
+            while node.untried_moves == [] and node.children != []:
+                node = node.select_child()
+                game.make_move(*node.move)
 
-        if node.untried_moves != []:
-            move = random.choice(node.untried_moves)
-            game.make_move(*move)
-            node = node.add_child(move)
+            if node.untried_moves != []:
+                move = random.choice(node.untried_moves)
+                game.make_move(*move)
+                node = node.add_child(move)
+            
+            while game.get_available_moves() != []:
+                move = random.choice(game.get_available_moves())
+                game.make_move(*move)
 
-        
-        while game.get_available_moves() != []:
-            move = random.choice(game.get_available_moves())
-            game.make_move(*move)
-
-        #backpropagate
-        while node is not None:
-            node.update(game.check_winner())
-            node = node.parent
+            #backpropagate
+            while node is not None:
+                node.update(game.check_winner())
+                node = node.parent
 
 
 class TicTacToeGUI:
-    def __init__(self, master, size=3, win_condition=3, mtsc_iterations=5000):
+    def __init__(self, master, size=3, win_condition=3, mtsc_iterations=5):
         self.mtsc_iterations = mtsc_iterations
         self.win_condition = win_condition
         self.master = master
@@ -151,7 +158,7 @@ class TicTacToeGUI:
 def main():
     root = tk.Tk()
     root.title("Tic-Tac-Toe")
-    app = TicTacToeGUI(root, size=3, win_condition=3, mtsc_iterations=5000)
+    app = TicTacToeGUI(root, size=3, win_condition=3, mtsc_iterations=500)
     root.mainloop()
 
 main()
