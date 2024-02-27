@@ -1,2 +1,7 @@
+*.pdf
+*.pyc
+*__*
+*.forsen
+*check*
 *.csv
 *.json
