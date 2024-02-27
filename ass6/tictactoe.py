@@ -6,31 +6,31 @@ import tkinter as tk
 # Zip would make the code look much cleaner instead of bombing this .py
 
 class TicTacToe:
-    def __init__(self, size=3, win_condition=3, mtsc_iterations=1000):
+    def __init__(self, size=3, win_condition=3, mtsc_iterations=5000):
         self.size = size
         self.board = np.zeros((self.size, self.size), dtype=int)
-        self.current_turn = 1  # 1 for 'X', -1 for 'O'
+        self.current_turn = 1  # 1 for X, -1 for O
         self.win_condition = win_condition
 
     def make_move(self, row, col):
         if self.board[row, col] == 0:
             self.board[row, col] = self.current_turn
-            self.current_turn = -self.current_turn  # Switch turns
+            self.current_turn = -self.current_turn  #Switch turns
             return True
         return False
 
     def check_winner(self):
         for i in range(self.size):
-            if abs(self.board[i, :].sum()) == self.win_condition: return 2
-            if abs(self.board[:, i].sum()) == self.win_condition: return 2
-        if abs(np.diag(self.board).sum()) == self.win_condition: return 2
-        if abs(np.diag(np.fliplr(self.board)).sum()) == self.win_condition: return 2
+            if abs(self.board[i, :].sum()) == self.size: return 2
+            if abs(self.board[:, i].sum()) == self.size: return 2
+        if abs(np.diag(self.board).sum()) == self.size: return 2
+        if abs(np.diag(np.fliplr(self.board)).sum()) == self.size: return 2
         if np.all(self.board != 0):
             return 1  # Draw
         return None
 
     def get_available_moves(self):
-        return [(i, j) for i in range(self.win_condition) for j in range(self.win_condition) if self.board[i, j] == 0]
+        return [(i, j) for i in range(self.size) for j in range(self.size) if self.board[i, j] == 0]
 
     def copy(self):
         new_game = TicTacToe(size=self.board.shape[0])
@@ -48,11 +48,11 @@ class MCTSNode:
         self.children = []
         self.untried_moves = game.get_available_moves()
 
-    def UCB1(self):
+    def UCT(self):
         return self.wins / self.visits + math.sqrt(2) * math.sqrt(math.log(self.parent.visits) / self.visits) if self.parent else float('inf')
 
     def select_child(self):
-        return max(self.children, key=lambda c: c.UCB1())
+        return max(self.children, key=lambda c: c.UCT())
 
     def add_child(self, move):
         new_game = self.game.copy()
@@ -76,7 +76,7 @@ class MCTSNode:
             elif result == 0:
                 self.wins += 0.5
 
-def MCTS(root, iterations=6000):
+def MCTS(root, iterations=5000):
     for _ in range(iterations):
         node = root
         game = root.game.copy()
@@ -98,9 +98,9 @@ def MCTS(root, iterations=6000):
             node.update(game.check_winner())
             node = node.parent
 
-
+'''
 class TicTacToeGUI:
-    def __init__(self, master, size=3, win_condition=3, mtsc_iterations=1000):
+    def __init__(self, master, size=3, win_condition=3, mtsc_iterations=5000):
         self.mtsc_iterations = mtsc_iterations
         self.win_condition = win_condition
         self.master = master
@@ -150,12 +150,34 @@ class TicTacToeGUI:
             for j in range(self.size):
                 self.buttons[i][j].config(state='disabled')
 
-# TicTacToe, MCTSNode, and MCTS functions/classes remain unchanged from previous examples.
 
 def main():
     root = tk.Tk()
-    root.title("Tic-Tac-Toe AI")
-    app = TicTacToeGUI(root, size=3, win_condition=3, mtsc_iterations=1000)
+    root.title("Tic-Tac-Toe")
+    app = TicTacToeGUI(root, size=4, win_condition=3, mtsc_iterations=5000)
     root.mainloop()
 
 main()
+'''
+
+
+def simulate_ai_game():
+    game = TicTacToe()
+    root = MCTSNode(game)
+
+    while game.check_winner() is None:
+        print(f"Turn: {'X' if game.current_turn == 1 else 'O'}")
+        MCTS(root, iterations=1000)
+        move = root.select_child().move
+        game.make_move(*move)
+        root = [child for child in root.children if child.move == move][0]
+        
+        print(game.board)
+        print("----------")
+
+        won = game.check_winner()
+        if won:
+            #print("Winner:", 'X' if winner == 1 else 'O' if winner == -1 else 'Draw')
+            break
+
+simulate_ai_game()
