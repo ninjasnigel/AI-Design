@@ -21,12 +21,12 @@ class TicTacToe:
 
     def check_winner(self):
         for i in range(self.size):
-            if abs(self.board[i, :].sum()) == self.size: return 2
-            if abs(self.board[:, i].sum()) == self.size: return 2
-        if abs(np.diag(self.board).sum()) == self.size: return 2
-        if abs(np.diag(np.fliplr(self.board)).sum()) == self.size: return 2
+            if abs(self.board[i, :].sum()) == self.size: return self.board[i, 0]
+            if abs(self.board[:, i].sum()) == self.size: return self.board[0, i]
+        if abs(np.diag(self.board).sum()) == self.size: return self.board[0, 0]
+        if abs(np.diag(np.fliplr(self.board)).sum()) == self.size: return self.board[0, -1]
         if np.all(self.board != 0):
-            return 1  # Draw
+            return 0  # Draw
         return None
 
     def get_available_moves(self):
@@ -64,17 +64,12 @@ class MCTSNode:
 
     def update(self, result):
         self.visits += 1
-        if self.parent is not None:
-            player = self.parent.game.current_turn
-            if result == player:
-                self.wins += 1
-            elif result == 0:  # Draw
-                self.wins += 0.5
-        else:
-            if (self.game.current_turn == -1 and result == 1) or (self.game.current_turn == 1 and result == -1):
-                self.wins += 1
-            elif result == 0:
-                self.wins += 0.5
+        
+        if self.game.current_turn == -1 and result == -1:
+            self.wins += 1
+        elif result == 0:
+            self.wins += 0.5
+        
 
 def MCTS(root, iterations=5000):
     for _ in range(iterations):
@@ -90,15 +85,17 @@ def MCTS(root, iterations=5000):
             game.make_move(*move)
             node = node.add_child(move)
 
+        
         while game.get_available_moves() != []:
             move = random.choice(game.get_available_moves())
             game.make_move(*move)
 
+        #backpropagate
         while node is not None:
             node.update(game.check_winner())
             node = node.parent
 
-'''
+
 class TicTacToeGUI:
     def __init__(self, master, size=3, win_condition=3, mtsc_iterations=5000):
         self.mtsc_iterations = mtsc_iterations
@@ -120,10 +117,11 @@ class TicTacToeGUI:
     def on_click(self, row, col):
         if self.game.make_move(row, col):
             self.update_buttons()
-            won = self.game.check_winner()
-            if won == 1: self.end_game(0)
-            elif won == 2: self.end_game(1)            
-            else: self.ai_move()
+            winner = self.game.check_winner()
+            if winner is not None:
+                self.end_game(winner)
+            else:
+                self.ai_move()
 
     def update_buttons(self):
         for i in range(self.size):
@@ -137,30 +135,29 @@ class TicTacToeGUI:
         move = root.select_child().move
         self.game.make_move(*move)
         self.update_buttons()
-        won = self.game.check_winner()
-        if won == 1: self.end_game(0)
-        elif won == 2: self.end_game(-1)
+        winner = self.game.check_winner()
+        if winner is not None:
+            self.end_game(winner)
 
     def end_game(self, winner):
-        print(winner)
         result = {1: "X wins!", -1: "O wins!", 0: "Draw!"}[winner]
         message = tk.Message(self.master, text=result, width=200)
-        message.grid(row=self.size, column=0, columnspan=self.size)
-        for i in range(self.size):
-            for j in range(self.size):
+        message.grid(row=3, column=0, columnspan=3)
+        for i in range(3):
+            for j in range(3):
                 self.buttons[i][j].config(state='disabled')
 
 
 def main():
     root = tk.Tk()
     root.title("Tic-Tac-Toe")
-    app = TicTacToeGUI(root, size=4, win_condition=3, mtsc_iterations=5000)
+    app = TicTacToeGUI(root, size=3, win_condition=3, mtsc_iterations=5000)
     root.mainloop()
 
 main()
+
+
 '''
-
-
 def simulate_ai_game():
     game = TicTacToe()
     root = MCTSNode(game)
@@ -181,3 +178,4 @@ def simulate_ai_game():
             break
 
 simulate_ai_game()
+'''
