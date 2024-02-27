@@ -4,7 +4,7 @@ import random
 class TicTacToe:
     def __init__(self, size=3):
         self.board = np.zeros((size, size), dtype=int)
-        self.current_turn = 1  # 1 for 'X', -1 for 'O'
+        self.current_turn = 1  # 1 for X, -1 for O
 
     def make_move(self, row, col):
         if self.board[row, col] == 0:
@@ -66,7 +66,7 @@ class MCTSNode:
     def is_terminal(self):
         return self.game.is_terminal()
 
-# MCTS Methods Adaptation
+
 
 def monte_carlo_tree_search(root, iterations=1000):
     for _ in range(iterations):
@@ -97,12 +97,12 @@ def backpropagate(node, result):
         node = node.parent
 
 def best_uct(node):
-    # UCT formula: wins / visits + sqrt(2 * log(parent.visits) / visits)
+
     log_parent_visits = np.log(node.parent.visits)
     return max(node.children, key=lambda x: x.wins / x.visits + np.sqrt(2 * log_parent_visits / x.visits))
 
 def best_child(node):
-    if not node.children:  # Check if the list of children is empty
+    if not node.children: 
         return None
     return max(node.children, key=lambda x: x.visits)
 
@@ -114,8 +114,6 @@ def pick_unvisited(node_children):
 
 import tkinter as tk
 from tkinter import messagebox
-
-# Assuming the TicTacToe, MCTSNode, and MCTS functions are already defined as per the previous code
 
 class TicTacToeGUI:
     def __init__(self, master):
