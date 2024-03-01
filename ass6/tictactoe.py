@@ -6,66 +6,45 @@ import tkinter as tk
 
 
 class TicTacToe:
-    
     def __init__(self, size=3):
-        
         self.size = size
         self.board = np.zeros((self.size, self.size))
         self.current_player = 1  # 1 for X, -1 for O
 
-
     def make_move(self, row, col):
-        
         if self.board[row, col] == 0:
-            
             self.board[row, col] = self.current_player
             self.current_player = -self.current_player  #Switch turns
-            
             return True
-        
         return False
-
-
+    
     def check_winner(self):
-        
         for i in range(self.size):
-            
             if abs(self.board[i, :].sum()) == self.size: #rows
                 return self.board[i, 0] 
-            
             if abs(self.board[:, i].sum()) == self.size: #columns
                 return self.board[0, i] 
-
         if abs(np.diag(self.board).sum()) == self.size: #diagonal
             return self.board[0, 0] 
-        
         if abs(np.diag(np.fliplr(self.board)).sum()) == self.size: #other diagonal
             return self.board[0, -1] 
-        
         if np.all(self.board != 0):
             return 0  #draw
         
         return None
 
-
     def get_available_moves(self):
         return [(i, j) for i in range(self.size) for j in range(self.size) if self.board[i, j] == 0]
 
-
     def copy(self):
-        
         new_game = TicTacToe(size=self.board.shape[0])
         new_game.board = np.copy(self.board)
         new_game.current_player = self.current_player
-        
+
         return new_game
 
-
-
 class MCTSNode:
-    
     def __init__(self, game, parent=None, move=None):
-        
         self.game = game
         self.parent = parent
         self.move = move
@@ -76,16 +55,12 @@ class MCTSNode:
 
 
     def UCT(self):
-
         if self.parent:
             return self.wins / self.visits + math.sqrt(2) * math.sqrt(math.log(self.parent.visits) / self.visits) 
-        
         else:
             return float('inf')
 
-
     def select_child(self):
-        
         sorted_children = sorted(self.children, key=lambda c: c.UCT())
         #print([c.UCT() for c in sorted_children])
         
@@ -94,9 +69,7 @@ class MCTSNode:
         
         return selected_child
 
-
     def add_child(self, move):
-        
         new_game = self.game.copy()
         new_game.make_move(*move)
         child_node = MCTSNode(new_game, parent=self, move=move)
@@ -121,9 +94,7 @@ class MCTSNode:
         
 
 def MCTS(root, iterations=1000):
-    
     for _ in range(iterations):
-        
         node = root
         game = root.game.copy()
 
@@ -151,7 +122,6 @@ def MCTS(root, iterations=1000):
 class TicTacToeGUI:
     
     def __init__(self, master, size=3, mtsc_iterations=1000):
-        
         self.mtsc_iterations = mtsc_iterations
         self.master = master
         self.size = size 
@@ -198,14 +168,12 @@ class TicTacToeGUI:
 
 
     def end_game(self, winner):
-        
         result = {1: 'X wins!', -1: 'O wins!', 0: 'Draw!'}[winner]
         message = tk.Message(self.master, text=result, width=200)
         message.grid(row=self.size, column=0, columnspan=self.size)
         
         for i in range(self.size):
             for j in range(self.size):
-                
                 self.buttons[i][j].config(state='disabled')
 
 
