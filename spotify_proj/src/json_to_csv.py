@@ -74,3 +74,6 @@ def update_co_occurrences_from_folder(folder_path, slice_limit=5):
         co_occurrences = slice_to_csv(file_path, co_occurrences)
 
     return co_occurrences
+
+def artist_song_string_split(str):
+    return str.split(' - ')[0], str.split(' - ', 1)[1].split(':')[0]
