@@ -1,4 +1,3 @@
-#TODO implement
 import json
 from collections import defaultdict
 import os
@@ -20,23 +19,6 @@ def slice_to_csv(slice_path="", co_occurrences=None):
                 co_occurrences[pair2][pair1] += 1  # Ensure symmetry, as co-occurrence is bidirectional
     return co_occurrences
 
-def print_co_occurrences(co_occurrences, limit=5, min_count=5):
-    # Convert the co_occurrences dictionary to a list of items for easy slicing
-    items = list(co_occurrences.items())
-    
-    # Sort the items based on the count in descending order
-    sorted_items = sorted(items, key=lambda x: sum(x[1].values()), reverse=True)
-    
-    # Iterate over the first `limit` items in the sorted list
-    for (artist_song, co_occurs) in sorted_items[:limit]:
-        print(f"'{artist_song[0]} - {artist_song[1]}' co-occurs with:")
-        # Sort the co-occurrences based on count in descending order
-        sorted_co_occurs = sorted(co_occurs.items(), key=lambda x: x[1], reverse=True)
-        for co_artist_song, count in sorted_co_occurs:
-            if count > min_count:
-                print(f"  - '{co_artist_song[0]} - {co_artist_song[1]}': {count} times")
-        print()  # Print a newline for better separation between artists
-
 def find_top_co_occurrences(co_occurrences, artist_name, song_name, top_n=10):
     # Create a key from the provided artist name and song name
     search_key = (artist_name, song_name)
@@ -50,12 +32,13 @@ def find_top_co_occurrences(co_occurrences, artist_name, song_name, top_n=10):
     # Take the top_n items from the sorted list
     top_co_occurring_songs = sorted_co_occurring_songs[:top_n]
 
-    # Format and return the top co-occurring songs
-    result = []
-    for (co_song, count) in top_co_occurring_songs:
-        formatted_song = f"{co_song[0]} - {co_song[1]}: {count} times"
-        result.append(formatted_song)
+    if not top_co_occurring_songs:
+        print(f"No co-occurring songs found for '{artist_name} - {song_name}'")
 
+    # Format and return the top co-occurring songs
+    result = {}
+    for (co_song, count) in top_co_occurring_songs:
+        result[f"{co_song[0]} - {co_song[1]}"] = count
     return result
 
 def update_co_occurrences_from_folder(folder_path, slice_limit=5):
@@ -75,5 +58,46 @@ def update_co_occurrences_from_folder(folder_path, slice_limit=5):
 
     return co_occurrences
 
+def normalize_co_occurrences(co_occurrences):
+    normalized_co_occurrences = defaultdict(lambda: defaultdict(float))
+    total_co_occurrences = 0
+    for artist_song, co_occurring_songs in co_occurrences.items():
+        total_co_occurrences += co_occurring_songs
+    for artist_song, co_occurring_songs in co_occurrences.items():
+        normalized_co_occurrences[artist_song] = co_occurring_songs / total_co_occurrences
+    return normalized_co_occurrences
+
+def combine_co_occurence_list(co_occurrences_list):
+    combined_co_occurrences = defaultdict(lambda: defaultdict(int))
+    for co_occurrences in co_occurrences_list:
+        for artist_song, co_occurring_songs in co_occurrences.items():
+            if artist_song in combined_co_occurrences:
+                combined_co_occurrences[artist_song] += co_occurring_songs
+            else:
+                combined_co_occurrences[artist_song] = co_occurring_songs
+    # Sort key by value and return in a list
+    return combined_co_occurrences
+
+def print_combined_co_occurrences(co_occurrences, top_n=10, playlist=[]):
+    sorted_co_occurrences = dict(sorted(co_occurrences.items(), key=lambda item: item[1], reverse=True))
+    for i, (artist_song, co_occurring_songs) in enumerate(sorted_co_occurrences.items()):
+        if f"{artist_song[0]} - {artist_song[1]}" in playlist:
+            top_n += 1
+            continue
+        if i >= top_n:
+            break
+        print(f"{artist_song} - {co_occurring_songs}")
+
 def artist_song_string_split(str):
     return str.split(' - ')[0], str.split(' - ', 1)[1].split(':')[0]
+
+def get_recommendations(playlist, co_occurences, top_n=10):
+    co_occurences_list = []
+    for artist, song in playlist:
+        top_co_occurences = find_top_co_occurrences(co_occurences, artist, song, 50)
+        co_occorences_normalized = normalize_co_occurrences(top_co_occurences)
+        co_occurences_list.append(co_occorences_normalized)
+
+    # Combined co-occurences
+    combined_co_occurences = combine_co_occurence_list(co_occurences_list)
+    print_combined_co_occurrences(combined_co_occurences, 10, playlist=playlist)
