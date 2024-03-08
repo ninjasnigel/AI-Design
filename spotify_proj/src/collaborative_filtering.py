@@ -81,7 +81,7 @@ def combine_co_occurence_list(co_occurrences_list):
 def print_combined_co_occurrences(co_occurrences, top_n=10, playlist=[]):
     sorted_co_occurrences = dict(sorted(co_occurrences.items(), key=lambda item: item[1], reverse=True))
     for i, (artist_song, co_occurring_songs) in enumerate(sorted_co_occurrences.items()):
-        if f"{artist_song[0]} - {artist_song[1]}" in playlist:
+        if artist_song_string_split(artist_song) in playlist:
             top_n += 1
             continue
         if i >= top_n:
