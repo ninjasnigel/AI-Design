@@ -50,9 +50,7 @@ def update_database_with_slice(file_path, db_path="co_occurrences.db"):
     conn.commit()
     conn.close()
 
-import os
-
-def update_co_occurrences_from_folder(folder_path, db_path="co_occurrences.db", slice_limit=5):
+def update_co_occurrences_from_folder_database(folder_path, db_path="co_occurrences.db", slice_limit=5):
     # List all JSON files in the given folder and sort them
     filenames = [f for f in os.listdir(folder_path) if f.endswith('.json')]
     # Implement a custom sort function if needed, like numerical_sort_key, to ensure correct order
@@ -69,7 +67,7 @@ def update_co_occurrences_from_folder(folder_path, db_path="co_occurrences.db", 
     print("Finished updating co-occurrences in the database.")
 
 
-def get_top_co_occurring_songs(db_path, artist_name, song_name, top_n=10):
+def find_top_co_occurrences_database(db_path, artist_name, song_name, top_n=10):
     # Construct the search key from artist name and song name
     search_key = f"{artist_name} - {song_name}"
     
@@ -99,3 +97,14 @@ def get_top_co_occurring_songs(db_path, artist_name, song_name, top_n=10):
         top_co_occurrences.append(f"{song}: {count} times")
     
     return top_co_occurrences
+
+"""def get_recommendations(playlist, co_occurences, top_n=10, database=False):
+    co_occurences_list = []
+    for artist, song in playlist:
+        top_co_occurences = find_top_co_occurrences(co_occurences, artist, song, 50)
+        co_occorences_normalized = normalize_co_occurrences(top_co_occurences)
+        co_occurences_list.append(co_occorences_normalized)
+
+    # Combined co-occurences
+    combined_co_occurences = combine_co_occurence_list(co_occurences_list)
+    print_combined_co_occurrences(combined_co_occurences, top_n=top_n, playlist=playlist)"""

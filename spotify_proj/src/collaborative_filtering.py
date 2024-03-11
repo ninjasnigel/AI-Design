@@ -1,6 +1,7 @@
 import json
 from collections import defaultdict
 import os
+from src.database import *
 
 def slice_to_csv(slice_path="", co_occurrences=None):
     if co_occurrences is None:
@@ -91,10 +92,13 @@ def print_combined_co_occurrences(co_occurrences, top_n=10, playlist=[]):
 def artist_song_string_split(str):
     return str.split(' - ')[0], str.split(' - ', 1)[1].split(':')[0]
 
-def get_recommendations(playlist, co_occurences, top_n=10):
+def get_recommendations(playlist, co_occurences, top_n=10, use_database=False, database_path="co_occurrences.db"):
     co_occurences_list = []
     for artist, song in playlist:
-        top_co_occurences = find_top_co_occurrences(co_occurences, artist, song, 50)
+        if use_database:
+            top_co_occurences = find_top_co_occurrences_database(co_occurences, artist, song, 50)
+        else:
+            top_co_occurences = find_top_co_occurrences(co_occurences, artist, song, 50)
         co_occorences_normalized = normalize_co_occurrences(top_co_occurences)
         co_occurences_list.append(co_occorences_normalized)
 
