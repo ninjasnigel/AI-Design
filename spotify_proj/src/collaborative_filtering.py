@@ -100,4 +100,4 @@ def get_recommendations(playlist, co_occurences, top_n=10):
 
     # Combined co-occurences
     combined_co_occurences = combine_co_occurence_list(co_occurences_list)
-    print_combined_co_occurrences(combined_co_occurences, 10, playlist=playlist)
+    print_combined_co_occurrences(combined_co_occurences, top_n=top_n, playlist=playlist)
